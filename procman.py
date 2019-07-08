@@ -2,13 +2,11 @@
 
 import subprocess
 
-from utils.closeable import Closeable
-
 from .output_listener import OutputListener
 
-__all__ = ['ProcessManager']
+__all__ = ['Process']
 
-class ProcessManager(Closeable):
+class Process(object):
     def __init__(self, cmd):
         super().__init__()
         self._cmd = cmd
@@ -17,6 +15,12 @@ class ProcessManager(Closeable):
 
         self.on_process_output_event = \
             self._output_listener.on_output_event
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
     def close(self):
         self.stop(timeout=1)

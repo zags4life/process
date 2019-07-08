@@ -5,16 +5,16 @@ import time
 
 from .output_handlers import *
 from .output_listener import *
-from .procman import ProcessManager
+from .procman import Process
 
 import gc
 
 start_time = time.time()
 
 def process_manager_test():
-    print('Running ProcessManager Test ...')
+    print('Running Process Test ...')
 
-    with ProcessManager('ping 127.0.0.1') as proc:
+    with Process('ping 127.0.0.1') as proc:
         tail = TailOutputHandler()
 
         proc.on_process_output_event += tail
