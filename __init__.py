@@ -1,5 +1,5 @@
 # __init__.py
 
-from .procman import *
+from .process import Process
 from .output_handlers import *
 from .output_listener import *

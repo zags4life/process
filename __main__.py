@@ -5,7 +5,7 @@ import time
 
 from .output_handlers import *
 from .output_listener import *
-from .procman import Process
+from .process import Process
 
 import gc
 
