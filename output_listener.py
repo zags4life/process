@@ -47,9 +47,7 @@ class ReadlineMutex(object):
             return fd, line
 
     def __reading_thread(self, fd):
-        iterator = fd
-
-        for line in iterator:
+        for line in iter(fd.readline, ''):
             if not line:
                 break
 
@@ -121,17 +119,6 @@ class OutputUpdateEvent(object):
 
         return ops[event_type](line)
 
-        # if evt_type == OutputEventType.STDOUT:
-            # return self.__on_stdout_event(line)
-        # elif evt_type == OutputEventType.STDERR:
-            # return self.__on_stderr_event(line)
-        # elif evt_type == OutputEventType.BOS:
-            # return self.__on_bos_event()
-        # elif evt_type == OutputEventType.EOS:
-            # return self.__on_eos_event()
-
-        # raise AssertionError("Unknown event type '{}'".format(evt_type))
-
     def clear(self):
         self.__on_bos_event.clear()
         self.__on_eos_event.clear()
@@ -142,7 +129,7 @@ class OutputListener(Listener):
     def __init__(self):
         self.stdout = None
         self.stderr = None
-        
+
         self.__on_output_event = OutputUpdateEvent()
         self.__reader_mutex = None
         self.__reader_thread = None

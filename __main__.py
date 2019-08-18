@@ -11,35 +11,36 @@ import gc
 
 start_time = time.time()
 
+CMD = 'ping 127.0.0.1'
+
 def process_manager_test():
     print('Running Process Test ...')
 
-    with Process('ping 127.0.0.1') as proc:
+    timeout=10
+    delay = 3
+
+    with Process(CMD, host='127.0.0.1') as proc:
         tail = TailOutputHandler()
 
         proc.on_process_output_event += tail
         proc.on_process_output_event += PrintOutputHandler()
 
         proc.start()
-        proc.wait_for_exit(timeout=120)
-
-        time.sleep(3)
+        proc.wait_for_exit(timeout=timeout)
+        proc.stop()
 
         print()
-        for line in tail.lines:
-            print(line)
+        for num, line in enumerate(tail.lines):
+            print('{0:>3}: {1}'.format(num+1, line))
 
-        print("Took {} sec".format((time.time() - start_time) - 3))
-
+        print("\nTook {} sec".format((time.time() - start_time)))
 
 def output_listener_test():
     threads = []
 
     def stuff(output):
-        cmd = 'ping 127.0.0.1'
-
         try:
-            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            proc = subprocess.Popen(CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output.stdout = proc.stdout
             output.stderr = proc.stderr
             output.start_listener()

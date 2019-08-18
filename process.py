@@ -1,20 +1,20 @@
 # procman.py
 
-import subprocess
-
 from .output_listener import OutputListener
+from .process_mgr import LocalProcess, RemoteProcess
 
 __all__ = ['Process']
 
 class Process(object):
-    def __init__(self, cmd):
+    def __init__(self, cmd, shell=False, host=None, port=5000):
         super().__init__()
-        self._cmd = cmd
-        self._output_listener = OutputListener()
-        self._proc = None
 
+        self.__proc = LocalProcess(cmd, shell) if host is None \
+            else RemoteProcess(cmd, shell, host, port)
+
+        self.__output_listener = OutputListener()
         self.on_process_output_event = \
-            self._output_listener.on_output_event
+            self.__output_listener.on_output_event
 
     def __enter__(self):
         return self
@@ -26,37 +26,23 @@ class Process(object):
         self.stop(timeout=1)
 
     def start(self):
-        if self._proc:
-            return
+        assert not self.is_running
 
-        proc = subprocess.Popen(self._cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self._output_listener.stdout = proc.stdout
-        self._output_listener.stderr = proc.stderr
-        self._output_listener.start_listener()
-        self._proc = proc
+        self.__proc.start()
+        self.__output_listener.stdout = self.__proc.stdout()
+        self.__output_listener.stderr = self.__proc.stderr()
+        self.__output_listener.start_listener()
 
     def stop(self, timeout=10):
-        if not self._proc:
-            return
+        '''Stops the underlying process'''
 
-        self._proc.terminate()
-        self._proc.wait(timeout=timeout)
-        retval = self._proc.poll()
-
-        if not retval:
-            self._proc.kill()
-            self._proc.wait(timeout=timeout)
-            retval = self._proc.poll()
-        self._output_listener.stop_listener()
-        self._proc = None
-        return retval
+        # Defer all logic to the underlying process class
+        self.__proc.stop(timeout=timeout)
+        self.__output_listener.stop_listener()
 
     def wait_for_exit(self, timeout=None):
-        try:
-            self._proc.wait(timeout=timeout)
-            return True
-        except subprocess.TimeoutExpired:
-            return False
+        return self.__proc.wait_for_exit(timeout=timeout)
 
+    @property
     def is_running(self):
-        return self._proc and self._proc.poll() is None
+        return self.__proc.is_running()
