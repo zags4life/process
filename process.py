@@ -33,12 +33,12 @@ class Process(object):
         self.__output_listener.stderr = self.__proc.stderr()
         self.__output_listener.start_listener()
 
-    def stop(self, timeout=10):
+    def stop(self, timeout=5):
         '''Stops the underlying process'''
 
         # Defer all logic to the underlying process class
         self.__proc.stop(timeout=timeout)
-        self.__output_listener.stop_listener()
+        self.__output_listener.stop_listener(timeout=timeout)
 
     def wait_for_exit(self, timeout=None):
         return self.__proc.wait_for_exit(timeout=timeout)

@@ -159,9 +159,9 @@ class OutputListener(Listener):
         self.__reader_thread.daemon = True
         self.__reader_thread.start()
 
-    def stop_listener(self):
+    def stop_listener(self, timeout=None):
         if self.__reader_thread:
-            self.__reader_thread.join()
+            self.__reader_thread.join(timeout)
             self.__reader_thread = None
 
     ##########################################################
