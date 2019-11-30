@@ -40,7 +40,8 @@ def output_listener_test():
 
     def stuff(output):
         try:
-            proc = subprocess.Popen(CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            proc = subprocess.Popen(CMD, shell=True, 
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output.stdout = proc.stdout
             output.stderr = proc.stderr
             output.start_listener()
@@ -66,8 +67,9 @@ def output_listener_test():
 
         time.sleep(10)
 
-        for line in tail_handler.lines:
-            print('0x{0:08x} - {1}: {2}'.format(threading.current_thread().ident, datetime.now(), line))
+        for line in tail_handler.get_lines():
+            print(f'0x{threading.current_thread().ident:08x} ' \
+                f'- {datetime.now()}: {line}')
 
 
     with OutputListener() as output:
@@ -87,5 +89,5 @@ def output_listener_test():
             t.join()
 
 if __name__ == '__main__':
-    process_manager_test()
-    # output_listener_test()
+    # process_manager_test()
+    output_listener_test()

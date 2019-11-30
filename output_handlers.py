@@ -92,8 +92,9 @@ class FileOutputHandler(OutputHandler):
     on_stderr = on_stdout
 
 class TailIterator(object):
-    def __init__(self, lines):
+    def __init__(self, lines, timeout):
         self._q = Queue()
+        self._timeout = timeout
 
         for line in lines:
             self._q.put_nowait(line)
@@ -106,7 +107,7 @@ class TailIterator(object):
 
     def __next__(self):
         try:
-            return self._q.get(block=True, timeout=0.5)
+            return self._q.get(block=True, timeout=self._timeout)
         except Empty:
             raise StopIteration()
 
@@ -132,8 +133,7 @@ class TailOutputHandler(OutputHandler):
         self.__lines.append(line)
     on_stderr = on_stdout
 
-    @property
-    def lines(self):
-        iterator = TailIterator(self.__lines)
+    def get_lines(self, timeout=1):
+        iterator = TailIterator(self.__lines, timeout=timeout)
         self.__weakrefs.append(weakref.ref(iterator))
         return iterator
